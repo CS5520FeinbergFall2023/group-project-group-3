@@ -4,11 +4,11 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
+    private double totalPrice = 100;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,6 +25,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if(clicked_id==R.id.history_button){
             Intent about_me_intent = new Intent(this,HistoryMapActivity.class);
             startActivity(about_me_intent);
+        }
+        if(clicked_id==R.id.splitBills_button){
+            Intent intent = new Intent(this,SplitBillsActivity.class);
+            intent.putExtra("totalPrice",totalPrice);
+            startActivity(intent);
         }
     }
 }

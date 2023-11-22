@@ -187,7 +187,7 @@ public class HistoryMapActivity extends FragmentActivity implements OnMapReadyCa
         };
         int i = 0;
         for(LatLng l:latLngArray){
-            historyList.add(new TipHistory(l,"test","test desc",System.currentTimeMillis()));
+            historyList.add(new TipHistory(l.latitude, l.longitude,"test","test desc",System.currentTimeMillis()));
             historyAdapter.notifyItemInserted(i++);
         }
     }

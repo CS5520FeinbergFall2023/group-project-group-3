@@ -13,6 +13,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -41,6 +42,8 @@ public class HistoryMapActivity extends FragmentActivity implements OnMapReadyCa
     private View root;
     private TipHistoryAdapter historyAdapter;
     private static final List<TipHistory> historyList = new ArrayList<>();
+
+    private boolean mapReady;
 
     private void createRecyclerView() {
 
@@ -85,7 +88,7 @@ public class HistoryMapActivity extends FragmentActivity implements OnMapReadyCa
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        mapReady = false;
         root = getWindow().getDecorView().findViewById(android.R.id.content);
 
         edu.northeastern.tipmate.databinding.ActivityHistoryMapBinding binding = ActivityHistoryMapBinding.inflate(getLayoutInflater());
@@ -161,6 +164,9 @@ public class HistoryMapActivity extends FragmentActivity implements OnMapReadyCa
     }
 
     private void updateMarker(){
+        while(!mapReady){
+            Log.d("GMS","Waiting for mapReady");
+        }
         currentMarker.setPosition(new LatLng(latitude,longitude));
     }
 
@@ -172,6 +178,7 @@ public class HistoryMapActivity extends FragmentActivity implements OnMapReadyCa
 
         createRecyclerView();
         addExamples();
+        mapReady = true;
     }
 
     private void addExamples(){

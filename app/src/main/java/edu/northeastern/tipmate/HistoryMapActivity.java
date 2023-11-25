@@ -1,6 +1,7 @@
 package edu.northeastern.tipmate;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.ItemTouchHelper;
@@ -33,6 +34,7 @@ import edu.northeastern.tipmate.databinding.ActivityHistoryMapBinding;
 
 public class HistoryMapActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener {
 
+    @Nullable
     private GoogleMap mMap;
     private LocationManager locationManager;
     private double latitude;
@@ -164,10 +166,11 @@ public class HistoryMapActivity extends FragmentActivity implements OnMapReadyCa
     }
 
     private void updateMarker(){
-        while(!mapReady){
+        if(!mapReady){
             Log.d("GMS","Waiting for mapReady");
+        }else {
+            currentMarker.setPosition(new LatLng(latitude,longitude));
         }
-        currentMarker.setPosition(new LatLng(latitude,longitude));
     }
 
     @Override

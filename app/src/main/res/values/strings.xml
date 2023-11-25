@@ -12,4 +12,5 @@
     <string name="split">Split</string>
     <string name="price">$%.2f</string>
     <string name="totalPP">Total Per Person</string>
+    <string name="save_split_bills">Confirm and Save</string>
 </resources>

@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">TipMate</string>
     <string name="title_activity_history_map">HistoryMapActivity</string>
+    <string name="title_activity_split_bills">SplitBillsActivity</string>
     <string name="description">Description</string>
     <string name="title">Title</string>
     <string name="tip_history">TipHistory</string>

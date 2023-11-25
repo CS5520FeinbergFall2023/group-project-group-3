@@ -167,7 +167,7 @@ public class HistoryMapActivity extends FragmentActivity implements OnMapReadyCa
 
     private void updateMarker(){
         if(!mapReady){
-            Log.d("GMS","Waiting for mapReady");
+
         }else {
             currentMarker.setPosition(new LatLng(latitude,longitude));
         }

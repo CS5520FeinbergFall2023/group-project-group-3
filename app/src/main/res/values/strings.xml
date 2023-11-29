@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">TipMate</string>
     <string name="title_activity_history_map">HistoryMapActivity</string>
+    <string name="title_activity_split_bills">SplitBillsActivity</string>
     <string name="description">Description</string>
     <string name="title">Title</string>
     <string name="tip_history">TipHistory</string>
@@ -11,4 +12,5 @@
     <string name="split">Split</string>
     <string name="price">$%.2f</string>
     <string name="totalPP">Total Per Person</string>
+    <string name="save_split_bills">Confirm and Save</string>
 </resources>

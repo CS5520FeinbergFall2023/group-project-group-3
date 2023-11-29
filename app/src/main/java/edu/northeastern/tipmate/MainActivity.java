@@ -1,7 +1,10 @@
 package edu.northeastern.tipmate;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -19,6 +22,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         Button tipCalculatorBtn = findViewById(R.id.tip_calculator_button);
         tipCalculatorBtn.setOnClickListener(this);
+
+        if (ActivityCompat.checkSelfPermission(
+                this, android.Manifest.permission.ACCESS_FINE_LOCATION) !=
+                PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    PackageManager.PERMISSION_GRANTED);
+        }
     }
 
     @Override

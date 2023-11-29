@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <item name="HistoryRecyclerView" type="id" />
+    <item name="tip_calculator_button" type="id" />
+    <item name="textTipAmount" type="id" />
 </resources>

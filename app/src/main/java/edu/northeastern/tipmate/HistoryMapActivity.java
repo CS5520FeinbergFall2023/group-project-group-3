@@ -1,6 +1,7 @@
 package edu.northeastern.tipmate;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.ItemTouchHelper;
@@ -13,6 +14,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -32,6 +34,7 @@ import edu.northeastern.tipmate.databinding.ActivityHistoryMapBinding;
 
 public class HistoryMapActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener {
 
+    @Nullable
     private GoogleMap mMap;
     private LocationManager locationManager;
     private double latitude;
@@ -41,6 +44,8 @@ public class HistoryMapActivity extends FragmentActivity implements OnMapReadyCa
     private View root;
     private TipHistoryAdapter historyAdapter;
     private static final List<TipHistory> historyList = new ArrayList<>();
+
+    private boolean mapReady;
 
     private void createRecyclerView() {
 
@@ -85,7 +90,7 @@ public class HistoryMapActivity extends FragmentActivity implements OnMapReadyCa
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        mapReady = false;
         root = getWindow().getDecorView().findViewById(android.R.id.content);
 
         edu.northeastern.tipmate.databinding.ActivityHistoryMapBinding binding = ActivityHistoryMapBinding.inflate(getLayoutInflater());
@@ -161,7 +166,11 @@ public class HistoryMapActivity extends FragmentActivity implements OnMapReadyCa
     }
 
     private void updateMarker(){
-        currentMarker.setPosition(new LatLng(latitude,longitude));
+        if(!mapReady){
+
+        }else {
+            currentMarker.setPosition(new LatLng(latitude,longitude));
+        }
     }
 
     @Override
@@ -172,6 +181,7 @@ public class HistoryMapActivity extends FragmentActivity implements OnMapReadyCa
 
         createRecyclerView();
         addExamples();
+        mapReady = true;
     }
 
     private void addExamples(){
@@ -187,7 +197,7 @@ public class HistoryMapActivity extends FragmentActivity implements OnMapReadyCa
         };
         int i = 0;
         for(LatLng l:latLngArray){
-            historyList.add(new TipHistory(l,"test","test desc",System.currentTimeMillis()));
+            historyList.add(new TipHistory(l.latitude, l.longitude,"test","test desc",System.currentTimeMillis()));
             historyAdapter.notifyItemInserted(i++);
         }
     }

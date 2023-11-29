@@ -23,6 +23,11 @@
             android:label="@string/title_activity_history_map">
         </activity>
         <activity
+            android:name=".SplitBillsActivity"
+            android:exported="true"
+            android:label="@string/title_activity_split_bills">
+        </activity>
+        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>

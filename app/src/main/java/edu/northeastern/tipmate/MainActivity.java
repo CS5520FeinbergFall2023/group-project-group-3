@@ -1,7 +1,6 @@
 package edu.northeastern.tipmate;
 
 import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -17,6 +16,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         Button history_btn = findViewById(R.id.history_button);
         history_btn.setOnClickListener(this);
+
+        Button tipCalculatorBtn = findViewById(R.id.tip_calculator_button);
+        tipCalculatorBtn.setOnClickListener(this);
     }
 
     @Override
@@ -30,6 +32,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Intent intent = new Intent(this,SplitBillsActivity.class);
             intent.putExtra("totalPrice",totalPrice);
             startActivity(intent);
+        }
+        if (clicked_id == R.id.tip_calculator_button) {
+            Intent tipCalculatorIntent = new Intent(this, TipCalculatorActivity.class);
+            startActivity(tipCalculatorIntent);
         }
     }
 }

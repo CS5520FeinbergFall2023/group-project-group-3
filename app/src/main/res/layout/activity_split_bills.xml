@@ -6,7 +6,6 @@
     android:layout_height="match_parent"
     android:background="@drawable/bg"
     tools:context=".SplitBillsActivity">
-
     <ImageView
         android:id="@+id/share_screen"
         android:layout_width="41dp"
@@ -16,7 +15,6 @@
         android:src="@drawable/dots1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
     <ImageView
         android:id="@+id/decoration"
         android:layout_width="28dp"
@@ -27,75 +25,36 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/totalPrice"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="36dp"
-        android:layout_marginTop="32dp"
-        android:fontFamily="@font/ArialBold"
-        android:text="@string/total"
-        android:textColor="@color/dark"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/splitSeekBar" />
-
-    <TextView
-        android:id="@+id/total"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="36dp"
-        android:layout_marginTop="16dp"
-        android:fontFamily="@font/ArialBold"
-        android:text="@string/tip"
-        android:textColor="@color/dark"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView" />
-
-    <TextView
-        android:id="@+id/total2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="36dp"
-        android:layout_marginTop="32dp"
-        android:fontFamily="@font/ArialBold"
-        android:text="@string/bill_amount"
-        android:textColor="@color/dark"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/decoration" />
 
     <TextView
         android:id="@+id/split"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="36dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="42dp"
         android:text="@string/split"
-        android:fontFamily="@font/ArialBold"
+        android:fontFamily="@font/arialbold"
         android:textColor="@color/dark"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView2" />
+        app:layout_constraintTop_toBottomOf="@+id/totalPrice" />
+
+    <TextView
+        android:id="@+id/splitNumber"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/arialbold"
+        android:text="TextView"
+        android:textColor="@color/white"
+        app:layout_constraintBottom_toBottomOf="@+id/splitSeekBar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/split" />
 
     <SeekBar
         android:id="@+id/splitSeekBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="28dp"
-        android:layout_marginTop="32dp"
-        android:layout_marginEnd="28dp"
-        android:backgroundTint="@color/white"
-        android:progressBackgroundTint="@color/white"
-        android:progressTint="@color/dark"
-        android:thumbTint="@color/white"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/total" />
-
-    <SeekBar
-        android:id="@+id/splitSeekBar2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="28dp"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="56dp"
         android:layout_marginEnd="28dp"
         android:backgroundTint="@color/white"
         android:progressBackgroundTint="@color/white"
@@ -105,43 +64,47 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/split" />
 
-    <TextView
-        android:id="@+id/totalPP"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="36dp"
-        android:layout_marginTop="32dp"
-        android:fontFamily="@font/ArialBold"
-        android:text="@string/totalPP"
-        android:textColor="@color/white"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/splitSeekBar2" />
+
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/total"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/arialbold"
+        android:layout_marginStart="36dp"
+        android:layout_marginTop="56dp"
+        android:text="@string/total"
+        android:textColor="@color/dark"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/decoration" />
+
+
+    <TextView
+        android:id="@+id/totalPrice"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="36dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="42dp"
         android:fontFamily="sans-serif-thin"
         android:text="@string/bill_amount_text"
         android:textColor="@color/white"
         android:textSize="@dimen/bill_amount"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/total2" />
+        app:layout_constraintTop_toBottomOf="@+id/total" />
+
+
 
     <TextView
-        android:id="@+id/textView2"
-        android:layout_width="wrap_content"
+        android:id="@+id/totalPP"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="36dp"
-        android:layout_marginTop="16dp"
-        android:fontFamily="sans-serif-thin"
-        android:text="@string/total_text"
+        android:layout_marginTop="56dp"
+        android:fontFamily="@font/arialbold"
+        android:text="@string/totalPP"
         android:textColor="@color/white"
-        android:textSize="@dimen/bill_amount"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/totalPrice" />
+        app:layout_constraintTop_toBottomOf="@+id/splitSeekBar" />
 
     <TextView
         android:id="@+id/textView3"
@@ -161,7 +124,7 @@
         app:layout_constraintTop_toBottomOf="@+id/totalPP" />
 
     <TextView
-        android:id="@+id/textView4"
+        android:id="@+id/totalPP_price"
         android:layout_width="298dp"
         android:layout_height="144dp"
         android:layout_marginStart="16dp"
@@ -178,4 +141,21 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/textView3"
         app:layout_constraintTop_toBottomOf="@+id/totalPP" />
+
+
+    <Button
+        android:id="@+id/saveSplitBills"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="28dp"
+        android:layout_marginEnd="28dp"
+        android:layout_marginBottom="36dp"
+        android:onClick="onClick"
+        android:text="@string/save_split_bills"
+        android:textColor="@color/dark"
+        android:background="@drawable/rounded_button"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/totalPP_price" />
 </androidx.constraintlayout.widget.ConstraintLayout>

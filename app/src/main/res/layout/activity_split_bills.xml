@@ -4,90 +4,158 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/bg"
     tools:context=".SplitBillsActivity">
+    <ImageView
+        android:id="@+id/share_screen"
+        android:layout_width="41dp"
+        android:layout_height="9dp"
+        android:layout_marginTop="36dp"
+        android:layout_marginEnd="36dp"
+        android:src="@drawable/dots1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+    <ImageView
+        android:id="@+id/decoration"
+        android:layout_width="28dp"
+        android:layout_height="31dp"
+        android:layout_marginStart="36dp"
+        android:layout_marginTop="36dp"
+        android:src="@drawable/dots2"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <LinearLayout
-        android:id="@+id/linearLayout_split"
-        android:layout_width="0dp"
-        android:layout_height="100dp"
-        android:orientation="vertical"
-        app:layout_constraintBottom_toTopOf="@+id/linearLayout4"
+
+    <TextView
+        android:id="@+id/split"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="36dp"
+        android:layout_marginTop="42dp"
+        android:text="@string/split"
+        android:fontFamily="@font/arialbold"
+        android:textColor="@color/dark"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/totalPrice" />
+
+    <TextView
+        android:id="@+id/splitNumber"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/arialbold"
+        android:text="TextView"
+        android:textColor="@color/white"
+        app:layout_constraintBottom_toBottomOf="@+id/splitSeekBar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/split" />
+
+    <SeekBar
+        android:id="@+id/splitSeekBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="28dp"
+        android:layout_marginTop="56dp"
+        android:layout_marginEnd="28dp"
+        android:backgroundTint="@color/white"
+        android:progressBackgroundTint="@color/white"
+        android:progressTint="@color/dark"
+        android:thumbTint="@color/white"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout_total">
+        app:layout_constraintTop_toBottomOf="@+id/split" />
 
-        <TextView
-            android:id="@+id/split"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/split" />
 
-        <TextView
-            android:id="@+id/splitNumber"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="TextView" />
 
-        <SeekBar
-            android:id="@+id/splitSeekBar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/linearLayout_total"
-        android:layout_width="0dp"
-        android:layout_height="100dp"
-        android:orientation="vertical"
-        app:layout_constraintBottom_toTopOf="@+id/linearLayout_split"
-        app:layout_constraintEnd_toEndOf="parent"
+    <TextView
+        android:id="@+id/total"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/arialbold"
+        android:layout_marginStart="36dp"
+        android:layout_marginTop="56dp"
+        android:text="@string/total"
+        android:textColor="@color/dark"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toBottomOf="@+id/decoration" />
 
-        <TextView
-            android:id="@+id/total"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/total" />
 
-        <TextView
-            android:id="@+id/totalPrice"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="TextView" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/linearLayout4"
-        android:layout_width="0dp"
-        android:layout_height="100dp"
-        android:orientation="vertical"
-        app:layout_constraintBottom_toTopOf="@+id/saveSplitBills"
-        app:layout_constraintEnd_toEndOf="parent"
+    <TextView
+        android:id="@+id/totalPrice"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="36dp"
+        android:layout_marginTop="42dp"
+        android:fontFamily="sans-serif-thin"
+        android:text="@string/bill_amount_text"
+        android:textColor="@color/white"
+        android:textSize="@dimen/bill_amount"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout_split">
+        app:layout_constraintTop_toBottomOf="@+id/total" />
 
-        <TextView
-            android:id="@+id/totalPP"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/totalPP" />
 
-        <TextView
-            android:id="@+id/totalPP_price"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="TextView" />
-    </LinearLayout>
+
+    <TextView
+        android:id="@+id/totalPP"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="36dp"
+        android:layout_marginTop="56dp"
+        android:fontFamily="@font/arialbold"
+        android:text="@string/totalPP"
+        android:textColor="@color/white"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/splitSeekBar" />
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="36dp"
+        android:layout_marginTop="32dp"
+        android:fontFamily="sans-serif-thin"
+        android:shadowColor="@color/dark"
+        android:shadowDx="8"
+        android:shadowDy="8"
+        android:shadowRadius="10"
+        android:text="@string/dollar"
+        android:textColor="@color/white"
+        android:textSize="@dimen/bill_amount"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/totalPP" />
+
+    <TextView
+        android:id="@+id/totalPP_price"
+        android:layout_width="298dp"
+        android:layout_height="144dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="36dp"
+        android:fontFamily="@font/lettermagic"
+        android:shadowColor="@color/dark"
+        android:shadowDx="8"
+        android:shadowDy="8"
+        android:shadowRadius="10"
+        android:text="@string/total_pp_num"
+        android:textColor="@color/white"
+        android:textSize="@dimen/total_per_person"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/textView3"
+        app:layout_constraintTop_toBottomOf="@+id/totalPP" />
+
 
     <Button
         android:id="@+id/saveSplitBills"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginStart="28dp"
+        android:layout_marginEnd="28dp"
+        android:layout_marginBottom="36dp"
         android:onClick="onClick"
         android:text="@string/save_split_bills"
+        android:textColor="@color/dark"
+        android:background="@drawable/rounded_button"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout4" />
+        app:layout_constraintTop_toBottomOf="@+id/totalPP_price" />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -13,5 +13,10 @@
     <string name="price">$%.2f</string>
     <string name="totalPP">Total Per Person</string>
     <string name="save_split_bills">Confirm and Save</string>
-    <string name="title_activity_tip_calculator" />
+    <string name="tip">TIP</string>
+    <string name="total_text">$104.01</string>
+    <string name="bill_amount_text">$90.44</string>
+    <string name="bill_amount">BILL AMOUNT</string>
+    <string name="total_pp_num">10.40</string>
+    <string name="dollar">$</string>
 </resources>

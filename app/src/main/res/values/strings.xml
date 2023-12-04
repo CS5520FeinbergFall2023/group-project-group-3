@@ -13,4 +13,5 @@
     <string name="price">$%.2f</string>
     <string name="totalPP">Total Per Person</string>
     <string name="save_split_bills">Confirm and Save</string>
+    <string name="title_activity_tip_calculator" />
 </resources>

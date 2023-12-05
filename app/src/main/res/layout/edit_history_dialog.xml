@@ -28,7 +28,7 @@
             android:layout_marginStart="5dp"
             android:layout_toEndOf="@id/new_history_title"
             android:autofillHints=""
-            android:inputType="text" />
+            android:inputType="textMultiLine" />
 
     </RelativeLayout>
 
@@ -55,7 +55,8 @@
             android:layout_marginStart="5dp"
             android:layout_toEndOf="@id/new_history_desc"
             android:autofillHints=""
-            android:inputType="text" />
+            android:inputType="textMultiLine"
+            android:scrollbars="vertical"/>
 
     </RelativeLayout>
 </LinearLayout>

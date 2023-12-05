@@ -23,7 +23,7 @@ public class TipCalculatorActivity extends AppCompatActivity {
     private TextView textViewTipAmount;
     private TextView textViewTotalBill;
 
-    private final int[] tipPercentages = {10, 15, 20, 25}; // Customize as needed
+    private final int[] tipPercentages = {10, 15, 20, 25};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

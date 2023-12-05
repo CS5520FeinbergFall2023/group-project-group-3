@@ -19,4 +19,5 @@
     <string name="bill_amount">BILL AMOUNT</string>
     <string name="total_pp_num">10.40</string>
     <string name="dollar">$</string>
+    <string name="title_activity_tip_calculator" />
 </resources>

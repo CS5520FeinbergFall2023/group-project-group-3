@@ -15,6 +15,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -42,17 +43,16 @@ import java.util.Map;
 
 import edu.northeastern.tipmate.databinding.ActivityHistoryMapBinding;
 
-public class HistoryMapActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener{
+public class HistoryMapActivity extends FragmentActivity implements LocationListener, OnMapReadyCallback{
 
     @Nullable
     private GoogleMap mMap;
     private LocationManager locationManager;
-    private double latitude;
-    private double longitude;
+
     private Marker currentMarker;
     private View root;
     private TipHistoryAdapter historyAdapter;
-    private static final List<TipHistory> historyList = new ArrayList<>();
+    private List<TipHistory> historyList;
     private DatabaseReference databaseReference;
     private DatabaseAPI databaseAPI;
 
@@ -67,6 +67,39 @@ public class HistoryMapActivity extends FragmentActivity implements OnMapReadyCa
 
     private boolean mapReady;
 
+    private double latitude;
+    private double longitude;
+
+    private ValueEventListener historyListner;
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putDouble("LOCATION_LAT_KEY",
+                latitude);
+        outState.putDouble("LOCATION_LONG_KEY",
+                longitude);
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        startLocationUpdates();
+    }
+
+    private void startLocationUpdates() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 30000, 100, this);
+        }
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        longitude = location.getLongitude();
+        latitude = location.getLatitude();
+    }
+
+
     private void createRecyclerView() {
 
         RecyclerView historyRecyclerView = findViewById(R.id.HistoryRecyclerView);
@@ -75,7 +108,7 @@ public class HistoryMapActivity extends FragmentActivity implements OnMapReadyCa
         historyRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         //Associates the adapter with the RecyclerView
-        historyRecyclerView.setAdapter(new TipHistoryAdapter(historyList, this, mMap, clusterManager));
+        historyRecyclerView.setAdapter(new TipHistoryAdapter(historyList, this, mMap, clusterManager,databaseAPI));
 
         historyRecyclerView.setHasFixedSize(true);
 
@@ -96,11 +129,13 @@ public class HistoryMapActivity extends FragmentActivity implements OnMapReadyCa
                 historyAdapter.notifyItemRemoved(position);
                 clusterManager.removeItem(((TipHistoryViewHolder) viewHolder).marker);
                 clusterManager.cluster();
+                databaseAPI.getTipHistoryById(tmp.getId()).setValue(null);
 
                 Snackbar deleted = Snackbar.make(root, "Deleted an record", Snackbar.LENGTH_SHORT);
                 deleted.setAction("UNDO", view -> {
                     historyList.add(position, tmp);
                     historyAdapter.notifyItemInserted(position);
+                    databaseAPI.storeTipHistory(tmp);
                 });
                 deleted.show();
             }
@@ -115,6 +150,7 @@ public class HistoryMapActivity extends FragmentActivity implements OnMapReadyCa
         itemsCache.put(DEFAULT_ADDED_LIST, new ArrayList<HistoryMarker>());
         itemsCache.put(DEFAULT_DELETE_LIST, new ArrayList<HistoryMarker>());
         mapReady = false;
+        historyList = new ArrayList<>();
         databaseReference = FirebaseDatabase.getInstance().getReference();
         databaseAPI = new DatabaseAPI(databaseReference);
         root = getWindow().getDecorView().findViewById(android.R.id.content);
@@ -128,9 +164,7 @@ public class HistoryMapActivity extends FragmentActivity implements OnMapReadyCa
             requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     PackageManager.PERMISSION_GRANTED);
         }
-
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-
         if (savedInstanceState != null) {
             if (savedInstanceState.keySet().contains("LOCATION_LONG_KEY")) {
                 longitude = savedInstanceState.getDouble("LOCATION_LONG_KEY");
@@ -139,14 +173,13 @@ public class HistoryMapActivity extends FragmentActivity implements OnMapReadyCa
                 latitude = savedInstanceState.getDouble("LOCATION_LAT_KEY");
             }
         } else {
-//            startLocationUpdates();
+            startLocationUpdates();
             Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
             if (location != null) {
                 longitude = location.getLongitude();
                 latitude = location.getLatitude();
             }
         }
-
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -156,45 +189,10 @@ public class HistoryMapActivity extends FragmentActivity implements OnMapReadyCa
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        outState.putDouble("LOCATION_LAT_KEY",
-                latitude);
-        outState.putDouble("LOCATION_LONG_KEY",
-                longitude);
-        super.onSaveInstanceState(outState);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-//        startLocationUpdates();
-    }
-
-    private void startLocationUpdates() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 30000, 100, this);
-        }
-    }
-
-    @Override
-    public void onLocationChanged(Location location) {
-        longitude = location.getLongitude();
-        latitude = location.getLatitude();
-        updateMarker();
-    }
-
-    @Override
     protected void onPause() {
         super.onPause();
         locationManager.removeUpdates(this);
-    }
-
-    private void updateMarker() {
-        if (!mapReady) {
-
-        } else {
-            currentMarker.setPosition(new LatLng(latitude, longitude));
-        }
+        databaseAPI.getTipHistory().removeEventListener(historyListner);
     }
 
     private boolean itemsInSameLocation(Cluster<HistoryMarker> cluster) {
@@ -229,6 +227,7 @@ public class HistoryMapActivity extends FragmentActivity implements OnMapReadyCa
         clusterManager = new ClusterManager<HistoryMarker>(this, mMap);
         clusterRenderer = new DefaultClusterRenderer<HistoryMarker>(this, mMap, clusterManager);
         clusterManager.setRenderer(clusterRenderer);
+        clusterManager.getMarkerCollection().setInfoWindowAdapter(new HistoryInfoWindowAdapter(LayoutInflater.from(this)));
 
         mMap.setOnMarkerClickListener(clusterManager);
         mMap.setOnCameraIdleListener(clusterManager);
@@ -287,18 +286,18 @@ public class HistoryMapActivity extends FragmentActivity implements OnMapReadyCa
     }
 
     private void loadHistory(){
-        databaseAPI.getTipHistory().addValueEventListener(new ValueEventListener() {
+        historyListner = databaseAPI.getTipHistory().addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-                if(dataSnapshot.exists())
-                {
-                    for(DataSnapshot ds : dataSnapshot.getChildren()){
-                        TipHistory answer = ds.getValue(TipHistory.class);
-                        historyList.add(answer);
-                        historyAdapter.notifyItemInserted(historyList.size()-1);
+                historyList.clear();
+                for (DataSnapshot postSnapshot :dataSnapshot.getChildren()) {
+                    TipHistory t = postSnapshot.getValue(TipHistory.class);
+                    if(t!=null){
+                        t.setId(dataSnapshot.getKey());
+                        historyList.add(t);
                     }
                 }
+                historyAdapter.setHistoryList(historyList);
             }
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {

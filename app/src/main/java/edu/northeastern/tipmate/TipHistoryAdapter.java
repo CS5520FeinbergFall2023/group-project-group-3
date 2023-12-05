@@ -32,25 +32,32 @@ import java.util.Random;
 
 public class TipHistoryAdapter extends RecyclerView.Adapter<TipHistoryViewHolder> {
 
-    private final List<TipHistory> historyList;
+    private List<TipHistory> historyList;
     private final Context context;
 
     private final GoogleMap googleMap;
     private final ClusterManager<HistoryMarker> clusterManager;
+    private final DatabaseAPI databaseAPI;
 
     private static final SimpleDateFormat format = new SimpleDateFormat(" yyyy/MM/dd HH:mm:ss ", Locale.US);
 
-    public TipHistoryAdapter(List<TipHistory> historyList, Context context, GoogleMap googleMap, ClusterManager<HistoryMarker> clusterManager) {
+    public TipHistoryAdapter(List<TipHistory> historyList, Context context, GoogleMap googleMap, ClusterManager<HistoryMarker> clusterManager, DatabaseAPI databaseAPI) {
         this.historyList = historyList;
         this.context = context;
         this.googleMap = googleMap;
         this.clusterManager = clusterManager;
+        this.databaseAPI = databaseAPI;
     }
 
     @NonNull
     @Override
     public TipHistoryViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         return new TipHistoryViewHolder(LayoutInflater.from(context).inflate(R.layout.history_item, parent,false));
+    }
+
+    public void setHistoryList(List<TipHistory> historyList) {
+        this.historyList = historyList;
+        notifyDataSetChanged();
     }
 
     private HistoryMarker addHistoryMarker(TipHistory tipHistory){
@@ -96,15 +103,15 @@ public class TipHistoryAdapter extends RecyclerView.Adapter<TipHistoryViewHolder
                     TipHistory target = historyList.get(pos);
                     target.setTitle(title);
                     target.setDesc(desc);
-                    clusterManager.removeItem(holder.marker);
-                    clusterManager.cluster();
                     notifyItemChanged(pos);
+                    databaseAPI.getTipHistoryById(target.getId()).setValue(target);
 
                     Snackbar success = Snackbar.make(r, "Successfully edited", Snackbar.LENGTH_SHORT);
                     success.setAction("UNDO", v -> {
                         TipHistory tmp = historyList.get(pos);
                         tmp.setTitle(old_title);
                         tmp.setDesc(old_desc);
+                        databaseAPI.getTipHistoryById(tmp.getId()).setValue(tmp);
                         notifyItemChanged(pos);
                     });
                     success.show();

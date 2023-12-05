@@ -21,14 +21,20 @@ public class TipHistory {
         this.timestamp = timestamp;
     }
 
-
-    public LatLng getLatLng() {
-        return new LatLng(this.latitude, this.longitude);
+    public double getLatitude() {
+        return latitude;
     }
 
-    public void setLatLng(LatLng latLng) {
-        this.latitude = latLng.latitude;
-        this.longitude = latLng.longitude;;
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
     }
 
     public String getTitle() {

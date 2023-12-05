@@ -9,30 +9,40 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.maps.android.clustering.Cluster;
+import com.google.maps.android.clustering.ClusterManager;
+import com.google.maps.android.clustering.view.DefaultClusterRenderer;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import edu.northeastern.tipmate.databinding.ActivityHistoryMapBinding;
 
-public class HistoryMapActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener {
+public class HistoryMapActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener{
 
     @Nullable
     private GoogleMap mMap;
@@ -40,10 +50,20 @@ public class HistoryMapActivity extends FragmentActivity implements OnMapReadyCa
     private double latitude;
     private double longitude;
     private Marker currentMarker;
-
     private View root;
     private TipHistoryAdapter historyAdapter;
     private static final List<TipHistory> historyList = new ArrayList<>();
+    private DatabaseReference databaseReference;
+    private DatabaseAPI databaseAPI;
+
+    private ClusterManager<HistoryMarker> clusterManager;
+
+    private DefaultClusterRenderer<HistoryMarker> clusterRenderer;
+
+    private static final String DEFAULT_DELETE_LIST = "itemsDeleted";
+
+    private static final String DEFAULT_ADDED_LIST = "itemsAdded";
+    private Map<String, List<HistoryMarker>> itemsCache = new HashMap<>();
 
     private boolean mapReady;
 
@@ -55,7 +75,7 @@ public class HistoryMapActivity extends FragmentActivity implements OnMapReadyCa
         historyRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         //Associates the adapter with the RecyclerView
-        historyRecyclerView.setAdapter(new TipHistoryAdapter(historyList, this,mMap));
+        historyRecyclerView.setAdapter(new TipHistoryAdapter(historyList, this, mMap, clusterManager));
 
         historyRecyclerView.setHasFixedSize(true);
 
@@ -74,11 +94,12 @@ public class HistoryMapActivity extends FragmentActivity implements OnMapReadyCa
                 TipHistory tmp = historyList.get(position);
                 historyList.remove(position);
                 historyAdapter.notifyItemRemoved(position);
-                ((TipHistoryViewHolder) viewHolder).marker.remove();
+                clusterManager.removeItem(((TipHistoryViewHolder) viewHolder).marker);
+                clusterManager.cluster();
 
                 Snackbar deleted = Snackbar.make(root, "Deleted an record", Snackbar.LENGTH_SHORT);
                 deleted.setAction("UNDO", view -> {
-                    historyList.add(position,tmp);
+                    historyList.add(position, tmp);
                     historyAdapter.notifyItemInserted(position);
                 });
                 deleted.show();
@@ -90,7 +111,12 @@ public class HistoryMapActivity extends FragmentActivity implements OnMapReadyCa
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        itemsCache.put(DEFAULT_ADDED_LIST, new ArrayList<HistoryMarker>());
+        itemsCache.put(DEFAULT_DELETE_LIST, new ArrayList<HistoryMarker>());
         mapReady = false;
+        databaseReference = FirebaseDatabase.getInstance().getReference();
+        databaseAPI = new DatabaseAPI(databaseReference);
         root = getWindow().getDecorView().findViewById(android.R.id.content);
 
         edu.northeastern.tipmate.databinding.ActivityHistoryMapBinding binding = ActivityHistoryMapBinding.inflate(getLayoutInflater());
@@ -106,16 +132,16 @@ public class HistoryMapActivity extends FragmentActivity implements OnMapReadyCa
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
         if (savedInstanceState != null) {
-            if(savedInstanceState.keySet().contains("LOCATION_LONG_KEY")){
+            if (savedInstanceState.keySet().contains("LOCATION_LONG_KEY")) {
                 longitude = savedInstanceState.getDouble("LOCATION_LONG_KEY");
             }
-            if(savedInstanceState.keySet().contains("LOCATION_LAT_KEY")){
+            if (savedInstanceState.keySet().contains("LOCATION_LAT_KEY")) {
                 latitude = savedInstanceState.getDouble("LOCATION_LAT_KEY");
             }
-        }else{
-            startLocationUpdates();
+        } else {
+//            startLocationUpdates();
             Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            if(location!=null) {
+            if (location != null) {
                 longitude = location.getLongitude();
                 latitude = location.getLatitude();
             }
@@ -141,47 +167,144 @@ public class HistoryMapActivity extends FragmentActivity implements OnMapReadyCa
     @Override
     protected void onResume() {
         super.onResume();
-        startLocationUpdates();
+//        startLocationUpdates();
     }
 
     private void startLocationUpdates() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,30000,0,this);
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 30000, 100, this);
         }
     }
 
     @Override
-    public void onLocationChanged(Location location)
-    {
+    public void onLocationChanged(Location location) {
         longitude = location.getLongitude();
         latitude = location.getLatitude();
         updateMarker();
     }
 
     @Override
-    protected void onPause()
-    {
+    protected void onPause() {
         super.onPause();
         locationManager.removeUpdates(this);
     }
 
-    private void updateMarker(){
-        if(!mapReady){
+    private void updateMarker() {
+        if (!mapReady) {
 
-        }else {
-            currentMarker.setPosition(new LatLng(latitude,longitude));
+        } else {
+            currentMarker.setPosition(new LatLng(latitude, longitude));
         }
     }
 
+    private boolean itemsInSameLocation(Cluster<HistoryMarker> cluster) {
+        LinkedList<HistoryMarker> items = new LinkedList<>(cluster.getItems());
+        HistoryMarker item = items.remove(0);
+
+        double longitude = item.getPosition().longitude;
+        double latitude = item.getPosition().latitude;
+
+        for (HistoryMarker t : items) {
+            if (Double.compare(longitude, t.getPosition().longitude) != 0 && Double.compare(latitude, t.getPosition().latitude) != 0) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    @SuppressLint("PotentialBehaviorOverride")
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
         mMap = googleMap;
-        currentMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(latitude,longitude)).title("You").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude,longitude),14.0f));
+        mMap.getUiSettings().setZoomControlsEnabled(true);
+        mMap.getUiSettings().setMyLocationButtonEnabled(true);
+        mMap.getUiSettings().setCompassEnabled(true);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            mMap.setMyLocationEnabled(true);
+        }
 
+//        currentMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(latitude,longitude)).title("You").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude,longitude),mMap.getMaxZoomLevel()));
+        clusterManager = new ClusterManager<HistoryMarker>(this, mMap);
+        clusterRenderer = new DefaultClusterRenderer<HistoryMarker>(this, mMap, clusterManager);
+        clusterManager.setRenderer(clusterRenderer);
+
+        mMap.setOnMarkerClickListener(clusterManager);
+        mMap.setOnCameraIdleListener(clusterManager);
+        mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
+
+            @Override
+            public void onCameraMove() {
+
+                // get markers back to the original position if they were relocated
+                if (mMap.getCameraPosition().zoom < mMap.getMaxZoomLevel()) {
+                    clusterManager.removeItems(itemsCache.get(DEFAULT_ADDED_LIST));
+                    clusterManager.addItems(itemsCache.get(DEFAULT_DELETE_LIST));
+                    clusterManager.cluster();
+
+                    itemsCache.get(DEFAULT_ADDED_LIST).clear();
+                    itemsCache.get(DEFAULT_DELETE_LIST).clear();
+                }
+            }
+        });
+        clusterManager.setOnClusterClickListener(new ClusterManager.OnClusterClickListener<HistoryMarker>() {
+
+            @Override
+            public boolean onClusterClick(Cluster<HistoryMarker> cluster) {
+                float maxZoomLevel = mMap.getMaxZoomLevel();
+                float currentZoomLevel = mMap.getCameraPosition().zoom;
+
+                // only show markers if users is in the max zoom level
+                if (currentZoomLevel != maxZoomLevel||!itemsInSameLocation(cluster)) {
+                    return false;
+                }
+
+                // relocate the markers around the current markers position
+                int counter = 0;
+                float rotateFactor = (360f / cluster.getItems().size());
+                for (HistoryMarker item : cluster.getItems()) {
+                    double lat = item.getPosition().latitude + (0.00003 * Math.cos(++counter * rotateFactor));
+                    double lng = item.getPosition().longitude + (0.00003 * Math.sin(counter * rotateFactor));
+                    HistoryMarker copy = new HistoryMarker(lat, lng, item.getTitle(), item.getSnippet());
+
+                    clusterManager.removeItem(item);
+                    clusterManager.addItem(copy);
+                    clusterManager.cluster();
+
+                    itemsCache.get(DEFAULT_ADDED_LIST).add(copy);
+                    itemsCache.get(DEFAULT_DELETE_LIST).add(item);
+                }
+
+                return true;
+            }
+        });
         createRecyclerView();
-        addExamples();
+//        addExamples();
+        loadHistory();
+
         mapReady = true;
+    }
+
+    private void loadHistory(){
+        databaseAPI.getTipHistory().addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                if(dataSnapshot.exists())
+                {
+                    for(DataSnapshot ds : dataSnapshot.getChildren()){
+                        TipHistory answer = ds.getValue(TipHistory.class);
+                        historyList.add(answer);
+                        historyAdapter.notifyItemInserted(historyList.size()-1);
+                    }
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
     }
 
     private void addExamples(){

@@ -3,6 +3,7 @@ package edu.northeastern.tipmate;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,11 +18,17 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.maps.android.clustering.Cluster;
+import com.google.maps.android.clustering.ClusterManager;
+import com.google.maps.android.clustering.view.DefaultClusterRenderer;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Random;
 
 public class TipHistoryAdapter extends RecyclerView.Adapter<TipHistoryViewHolder> {
 
@@ -29,13 +36,15 @@ public class TipHistoryAdapter extends RecyclerView.Adapter<TipHistoryViewHolder
     private final Context context;
 
     private final GoogleMap googleMap;
+    private final ClusterManager<HistoryMarker> clusterManager;
 
     private static final SimpleDateFormat format = new SimpleDateFormat(" yyyy/MM/dd HH:mm:ss ", Locale.US);
 
-    public TipHistoryAdapter(List<TipHistory> historyList, Context context, GoogleMap googleMap) {
+    public TipHistoryAdapter(List<TipHistory> historyList, Context context, GoogleMap googleMap, ClusterManager<HistoryMarker> clusterManager) {
         this.historyList = historyList;
         this.context = context;
         this.googleMap = googleMap;
+        this.clusterManager = clusterManager;
     }
 
     @NonNull
@@ -44,8 +53,11 @@ public class TipHistoryAdapter extends RecyclerView.Adapter<TipHistoryViewHolder
         return new TipHistoryViewHolder(LayoutInflater.from(context).inflate(R.layout.history_item, parent,false));
     }
 
-    private Marker addHistoryMarker(TipHistory tipHistory){
-        return googleMap.addMarker(new MarkerOptions().position(tipHistory.getLatLng()).title(tipHistory.getTitle()).snippet(tipHistory.getDesc()));
+    private HistoryMarker addHistoryMarker(TipHistory tipHistory){
+        HistoryMarker ret = new HistoryMarker(tipHistory.getLatitude(), tipHistory.getLongitude(), tipHistory.getTitle(), tipHistory.getDesc());
+        clusterManager.addItem(ret);
+        clusterManager.cluster();
+        return ret;
     }
 
     @Override
@@ -59,8 +71,8 @@ public class TipHistoryAdapter extends RecyclerView.Adapter<TipHistoryViewHolder
 
         holder.itemView.setOnClickListener(view -> {
             int pos = holder.getAdapterPosition();
-            LatLng latLng = historyList.get(pos).getLatLng();
-            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng,14.0f));
+            LatLng latLng = new LatLng(historyList.get(pos).getLatitude(),historyList.get(pos).getLongitude());
+            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng,googleMap.getMaxZoomLevel()));
         });
         holder.itemView.setOnLongClickListener(view -> {
             int pos = holder.getAdapterPosition();
@@ -84,7 +96,8 @@ public class TipHistoryAdapter extends RecyclerView.Adapter<TipHistoryViewHolder
                     TipHistory target = historyList.get(pos);
                     target.setTitle(title);
                     target.setDesc(desc);
-                    holder.marker.remove();
+                    clusterManager.removeItem(holder.marker);
+                    clusterManager.cluster();
                     notifyItemChanged(pos);
 
                     Snackbar success = Snackbar.make(r, "Successfully edited", Snackbar.LENGTH_SHORT);

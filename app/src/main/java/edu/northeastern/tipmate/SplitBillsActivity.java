@@ -10,8 +10,11 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -29,10 +32,10 @@ import java.util.concurrent.CountDownLatch;
 public class SplitBillsActivity extends AppCompatActivity {
     private static SplitBillsActivity splitBillsActivity;
     private SeekBar splitSeekBar;
-    private TextView totalPriceView;
+    private EditText totalPriceView;
     private TextView splitTextView;
     private TextView totalPP;
-    private double totalPrice = 0.0;
+    private double totalPrice;
     private int numofPerson = 2;
     private double totalPerperson = 0.0;
     private DatabaseReference databaseReference;
@@ -51,12 +54,11 @@ public class SplitBillsActivity extends AppCompatActivity {
 
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
-        totalPriceView = (TextView) findViewById(R.id.totalPrice);
+        totalPriceView = (EditText) findViewById(R.id.totalPrice);
         splitSeekBar = (SeekBar) findViewById(R.id.splitSeekBar);
         splitTextView = (TextView) findViewById(R.id.splitNumber);
         totalPP = (TextView) findViewById(R.id.totalPP_price);
-        Intent intent = getIntent();
-        totalPrice = intent.getDoubleExtra("totalPrice",100.0);
+        totalPrice = parseDoubleOrDefault(totalPriceView.getText().toString(), 0.0);
         totalPriceView.setText(String.format(getResources().getString(R.string.price),totalPrice));
         splitTextView.setText("Number of person:" + 2);
         totalPerperson = totalPrice/numofPerson;
@@ -64,13 +66,26 @@ public class SplitBillsActivity extends AppCompatActivity {
 
         splitSeekBar.setMax(20);
         splitSeekBar.setMin(2);
+
+        totalPriceView.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void afterTextChanged(Editable s) {
+                calculateSplitBills(numofPerson);
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                calculateSplitBills(numofPerson);
+            }
+        });
         splitSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 numofPerson = progress;
-                totalPerperson = totalPrice/numofPerson;
-                splitTextView.setText("Number of person:" + Integer.toString(progress));
-                totalPP.setText(String.format(getResources().getString(R.string.price),totalPerperson));
+                calculateSplitBills(numofPerson);
             }
 
             @Override
@@ -85,6 +100,19 @@ public class SplitBillsActivity extends AppCompatActivity {
         });
     }
 
+    private double parseDoubleOrDefault(String str, double defaultValue) {
+        try {
+            return Double.parseDouble(str.substring(1));
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
+    }
+    private void calculateSplitBills(int numofPerson){
+        totalPrice = parseDoubleOrDefault(totalPriceView.getText().toString(), 0.0);
+        splitTextView.setText("Number of person:" + Integer.toString(numofPerson));
+        totalPerperson = totalPrice/numofPerson;
+        totalPP.setText(String.format(getResources().getString(R.string.price),totalPerperson));
+    }
     public void onClick(View view) {
         int clicked_id = view.getId();
         if(clicked_id==R.id.saveSplitBills){

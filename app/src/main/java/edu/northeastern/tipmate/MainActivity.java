@@ -10,7 +10,6 @@ import android.view.View;
 import android.widget.Button;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
-    private double totalPrice = 100;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,7 +39,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         if(clicked_id==R.id.splitBills_button){
             Intent intent = new Intent(this,SplitBillsActivity.class);
-            intent.putExtra("totalPrice",totalPrice);
             startActivity(intent);
         }
         if (clicked_id == R.id.tip_calculator_button) {

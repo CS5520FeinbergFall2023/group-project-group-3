@@ -8,6 +8,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.text.Editable;
@@ -27,9 +28,11 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.text.DateFormat;
+import java.util.Locale;
 import java.util.concurrent.CountDownLatch;
 
-public class SplitBillsActivity extends AppCompatActivity {
+public class SplitBillsActivity extends AppCompatActivity implements LocationListener {
     private static SplitBillsActivity splitBillsActivity;
     private SeekBar splitSeekBar;
     private EditText totalPriceView;
@@ -41,12 +44,70 @@ public class SplitBillsActivity extends AppCompatActivity {
     private DatabaseReference databaseReference;
     private DatabaseAPI databaseAPI;
     private LocationManager locationManager;
+    private double latitude;
+    private double longitude;
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putDouble("LOCATION_LAT_KEY",
+                latitude);
+        outState.putDouble("LOCATION_LONG_KEY",
+                longitude);
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        startLocationUpdates();
+    }
+
+    private void startLocationUpdates() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 30000, 100, this);
+        }
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        longitude = location.getLongitude();
+        latitude = location.getLatitude();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        locationManager.removeUpdates(this);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_split_bills);
+
+        if (ActivityCompat.checkSelfPermission(
+                this, android.Manifest.permission.ACCESS_FINE_LOCATION) !=
+                PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    PackageManager.PERMISSION_GRANTED);
+        }
+        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        if (savedInstanceState != null) {
+            if (savedInstanceState.keySet().contains("LOCATION_LONG_KEY")) {
+                longitude = savedInstanceState.getDouble("LOCATION_LONG_KEY");
+            }
+            if (savedInstanceState.keySet().contains("LOCATION_LAT_KEY")) {
+                latitude = savedInstanceState.getDouble("LOCATION_LAT_KEY");
+            }
+        } else {
+            startLocationUpdates();
+            Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            if (location != null) {
+                longitude = location.getLongitude();
+                latitude = location.getLatitude();
+            }
+        }
+
 
         splitBillsActivity = this;
         databaseReference = FirebaseDatabase.getInstance().getReference();
@@ -109,7 +170,7 @@ public class SplitBillsActivity extends AppCompatActivity {
     }
     private void calculateSplitBills(int numofPerson){
         totalPrice = parseDoubleOrDefault(totalPriceView.getText().toString(), 0.0);
-        splitTextView.setText("Number of person:" + Integer.toString(numofPerson));
+        splitTextView.setText("Number of person:" + numofPerson);
         totalPerperson = totalPrice/numofPerson;
         totalPP.setText(String.format(getResources().getString(R.string.price),totalPerperson));
     }
@@ -119,20 +180,12 @@ public class SplitBillsActivity extends AppCompatActivity {
             // Create a CountDownLatch for waiting for the response
             CountDownLatch latch = new CountDownLatch(1);
 
-            // Get current location
-            Location location = new Location("dummyprovider");
-            //default location
-            location.setLatitude(40.7128);
-            location.setLongitude(-74.0060);
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            }
-            String title = "Split Bills";
-            String description = "Split Bills with: "+ numofPerson + " people, total price: " + totalPrice
-                    + ", total per person: " + totalPerperson;
             long time = System.currentTimeMillis();
+            String title = "Split Bills";
+            String description = "Split Bills with: "+ numofPerson + " people\nTotal price: " + totalPrice
+                    + "\nTotal per person: " + String.format(Locale.US,"%.2f", totalPerperson) + "\nTime: " + DateFormat.getDateTimeInstance().format(time);
             // Create a sample TipHistory object
-            TipHistory tipHistory = new TipHistory(location.getLatitude(), location.getLongitude(), title, description, time);
+            TipHistory tipHistory = new TipHistory(latitude, longitude, title, description, time);
 
             // Store the TipHistory object
             databaseAPI.storeTipHistory(tipHistory).addOnSuccessListener(new OnSuccessListener<Void>() {

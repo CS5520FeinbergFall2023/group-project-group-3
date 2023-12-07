@@ -84,7 +84,7 @@ public class TipHistoryAdapter extends RecyclerView.Adapter<TipHistoryViewHolder
         holder.itemView.setOnLongClickListener(view -> {
             int pos = holder.getAdapterPosition();
             AlertDialog.Builder builder = new AlertDialog.Builder(context);
-            builder.setTitle("Please edit title and desc");
+            builder.setTitle("Edit");
             View dialogView = LayoutInflater.from(context).inflate(R.layout.edit_history_dialog, null);
             builder.setView(dialogView);
             EditText title_view = dialogView.findViewById(R.id.new_history_title_input);

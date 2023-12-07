@@ -181,8 +181,8 @@ public class SplitBillsActivity extends AppCompatActivity implements LocationLis
             CountDownLatch latch = new CountDownLatch(1);
 
             long time = System.currentTimeMillis();
-            String title = "Split Bills";
-            String description = "Split Bills with: "+ numofPerson + " people\nTotal price: " + totalPrice
+            String title = numofPerson + " people - $" + totalPrice;
+            String description = "Total person: "+ numofPerson + " people\nTotal price: " + totalPrice
                     + "\nTotal per person: " + String.format(Locale.US,"%.2f", totalPerperson) + "\nTime: " + DateFormat.getDateTimeInstance().format(time);
             // Create a sample TipHistory object
             TipHistory tipHistory = new TipHistory(latitude, longitude, title, description, time);

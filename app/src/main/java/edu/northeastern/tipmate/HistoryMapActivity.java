@@ -17,14 +17,17 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -43,7 +46,7 @@ import java.util.Map;
 
 import edu.northeastern.tipmate.databinding.ActivityHistoryMapBinding;
 
-public class HistoryMapActivity extends FragmentActivity implements LocationListener, OnMapReadyCallback{
+public class HistoryMapActivity extends FragmentActivity implements LocationListener, OnMapReadyCallback, ClusterManager.OnClusterClickListener<HistoryMarker> {
 
     @Nullable
     private GoogleMap mMap;
@@ -223,10 +226,11 @@ public class HistoryMapActivity extends FragmentActivity implements LocationList
         }
 
 //        currentMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(latitude,longitude)).title("You").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude,longitude),mMap.getMaxZoomLevel()));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude,longitude),14.0f));
         clusterManager = new ClusterManager<HistoryMarker>(this, mMap);
         clusterRenderer = new DefaultClusterRenderer<HistoryMarker>(this, mMap, clusterManager);
         clusterManager.setRenderer(clusterRenderer);
+        clusterManager.setOnClusterClickListener(this);
         clusterManager.getMarkerCollection().setInfoWindowAdapter(new HistoryInfoWindowAdapter(LayoutInflater.from(this)));
 
         mMap.setOnMarkerClickListener(clusterManager);
@@ -247,37 +251,7 @@ public class HistoryMapActivity extends FragmentActivity implements LocationList
                 }
             }
         });
-        clusterManager.setOnClusterClickListener(new ClusterManager.OnClusterClickListener<HistoryMarker>() {
-
-            @Override
-            public boolean onClusterClick(Cluster<HistoryMarker> cluster) {
-                float maxZoomLevel = mMap.getMaxZoomLevel();
-                float currentZoomLevel = mMap.getCameraPosition().zoom;
-
-                // only show markers if users is in the max zoom level
-                if (currentZoomLevel != maxZoomLevel||!itemsInSameLocation(cluster)) {
-                    return false;
-                }
-
-                // relocate the markers around the current markers position
-                int counter = 0;
-                float rotateFactor = (360f / cluster.getItems().size());
-                for (HistoryMarker item : cluster.getItems()) {
-                    double lat = item.getPosition().latitude + (0.00003 * Math.cos(++counter * rotateFactor));
-                    double lng = item.getPosition().longitude + (0.00003 * Math.sin(counter * rotateFactor));
-                    HistoryMarker copy = new HistoryMarker(lat, lng, item.getTitle(), item.getSnippet());
-
-                    clusterManager.removeItem(item);
-                    clusterManager.addItem(copy);
-                    clusterManager.cluster();
-
-                    itemsCache.get(DEFAULT_ADDED_LIST).add(copy);
-                    itemsCache.get(DEFAULT_DELETE_LIST).add(item);
-                }
-
-                return true;
-            }
-        });
+        clusterManager.setOnClusterClickListener(this);
         createRecyclerView();
 //        addExamples();
         loadHistory();
@@ -322,5 +296,37 @@ public class HistoryMapActivity extends FragmentActivity implements LocationList
             historyList.add(new TipHistory(l.latitude, l.longitude,"test","test desc",System.currentTimeMillis()));
             historyAdapter.notifyItemInserted(i++);
         }
+    }
+
+    @Override
+    public boolean onClusterClick(Cluster<HistoryMarker> cluster) {
+        float maxZoomLevel = mMap.getMaxZoomLevel();
+        float currentZoomLevel = mMap.getCameraPosition().zoom;
+
+        // only show markers if users is in the max zoom level
+        if(!itemsInSameLocation(cluster)){
+            return false;
+        }
+        if (currentZoomLevel != maxZoomLevel) {
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(cluster.getPosition(),mMap.getMaxZoomLevel()));
+            Toast.makeText(this,"Click one more to expand",Toast.LENGTH_SHORT).show();
+        }else {
+            // relocate the markers around the current markers position
+            int counter = 0;
+            float rotateFactor = (360f / cluster.getItems().size());
+            for (HistoryMarker item : cluster.getItems()) {
+                double lat = item.getPosition().latitude + (0.00003 * Math.cos(++counter * rotateFactor));
+                double lng = item.getPosition().longitude + (0.00003 * Math.sin(counter * rotateFactor));
+                HistoryMarker copy = new HistoryMarker(lat, lng, item.getTitle(), item.getSnippet());
+
+                clusterManager.removeItem(item);
+                clusterManager.addItem(copy);
+                clusterManager.cluster();
+
+                itemsCache.get(DEFAULT_ADDED_LIST).add(copy);
+                itemsCache.get(DEFAULT_DELETE_LIST).add(item);
+            }
+        }
+        return true;
     }
 }

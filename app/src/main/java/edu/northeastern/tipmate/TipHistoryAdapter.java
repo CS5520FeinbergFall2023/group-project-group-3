@@ -121,6 +121,7 @@ public class TipHistoryAdapter extends RecyclerView.Adapter<TipHistoryViewHolder
             AlertDialog dialog = builder.create();
             dialog.setCanceledOnTouchOutside(true);
             dialog.show();
+            dialog.getWindow().setBackgroundDrawableResource(R.drawable.rounded_button);
             return true;
         });
     }

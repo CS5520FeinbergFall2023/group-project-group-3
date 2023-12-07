@@ -155,7 +155,7 @@ public class HistoryMapActivity extends FragmentActivity implements LocationList
         mapReady = false;
         historyList = new ArrayList<>();
         databaseReference = FirebaseDatabase.getInstance().getReference();
-        databaseAPI = new DatabaseAPI(databaseReference);
+        databaseAPI = new DatabaseAPI(databaseReference, this);
         root = getWindow().getDecorView().findViewById(android.R.id.content);
 
         edu.northeastern.tipmate.databinding.ActivityHistoryMapBinding binding = ActivityHistoryMapBinding.inflate(getLayoutInflater());

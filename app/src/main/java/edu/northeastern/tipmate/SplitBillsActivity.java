@@ -111,7 +111,7 @@ public class SplitBillsActivity extends AppCompatActivity implements LocationLis
 
         splitBillsActivity = this;
         databaseReference = FirebaseDatabase.getInstance().getReference();
-        databaseAPI = new DatabaseAPI(databaseReference);
+        databaseAPI = new DatabaseAPI(databaseReference, this);
 
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 

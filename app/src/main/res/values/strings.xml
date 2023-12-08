@@ -4,7 +4,7 @@
     <string name="title_activity_split_bills">SplitBillsActivity</string>
     <string name="description">Description</string>
     <string name="title">Title</string>
-    <string name="tip_history">TipHistory</string>
+    <string name="split_history_history">SplitBill History</string>
     <string name="new_history_title">New History Title</string>
     <string name="new_history_description">New History Description</string>
     <string name="split_bills">Split Bills</string>

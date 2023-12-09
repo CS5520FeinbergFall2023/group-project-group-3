@@ -1,40 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
+    android:background="@drawable/bg"
     android:padding="12dp">
+    <ImageView
+        android:id="@+id/share_screen"
+        android:layout_width="41dp"
+        android:layout_height="9dp"
+        android:layout_marginTop="36dp"
+        android:layout_marginEnd="36dp"
+        android:src="@drawable/dots1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+    <ImageView
+        android:id="@+id/decoration"
+        android:layout_width="28dp"
+        android:layout_height="31dp"
+        android:layout_marginStart="36dp"
+        android:layout_marginTop="36dp"
+        android:src="@drawable/dots2"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <RelativeLayout
+    <EditText
+        android:id="@+id/new_history_title_input"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:textColor="@color/dark"
+        android:fontFamily="@font/arialbold"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="28dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="28dp"
+        android:autofillHints=""
+        android:hint="@string/new_history_title"
+        android:inputType="textMultiLine"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/decoration" />
 
-        <EditText
-            android:hint="@string/new_history_title"
-            android:id="@+id/new_history_title_input"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginStart="5dp"
-            android:autofillHints=""
-            android:inputType="textMultiLine" />
 
-    </RelativeLayout>
-
-    <RelativeLayout
+    <EditText
+        android:id="@+id/new_history_desc_input"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <EditText
-            android:hint="@string/new_history_description"
-            android:id="@+id/new_history_desc_input"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginStart="5dp"
-            android:autofillHints=""
-            android:inputType="textMultiLine"
-            android:scrollbars="vertical"/>
-
-    </RelativeLayout>
-</LinearLayout>
+        android:layout_height="wrap_content"
+        android:textColor="@color/dark"
+        android:fontFamily="@font/arialbold"
+        android:layout_marginStart="28dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="28dp"
+        android:autofillHints=""
+        android:hint="@string/new_history_description"
+        android:inputType="textMultiLine"
+        android:scrollbars="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/new_history_title_input" />
+</androidx.constraintlayout.widget.ConstraintLayout>

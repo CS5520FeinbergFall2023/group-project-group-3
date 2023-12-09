@@ -271,6 +271,11 @@ public class HistoryMapActivity extends FragmentActivity implements LocationList
                         historyList.add(t);
                     }
                 }
+                if(historyList.size()==0){
+                    findViewById(R.id.history_no_data).setVisibility(View.VISIBLE);
+                }else{
+                    findViewById(R.id.history_no_data).setVisibility(View.GONE);
+                }
                 historyAdapter.setHistoryList(historyList);
             }
             @Override

@@ -163,7 +163,7 @@ public class SplitBillsActivity extends AppCompatActivity implements LocationLis
 
     private double parseDoubleOrDefault(String str, double defaultValue) {
         try {
-            return Double.parseDouble(str.substring(1));
+            return Double.parseDouble(str);
         } catch (NumberFormatException e) {
             return defaultValue;
         }

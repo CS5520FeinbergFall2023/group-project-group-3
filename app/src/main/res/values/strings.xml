@@ -10,7 +10,7 @@
     <string name="split_bills">Split Bills</string>
     <string name="total">Total</string>
     <string name="split">Split</string>
-    <string name="price">$%.2f</string>
+    <string name="price">%.2f</string>
     <string name="totalPP">Total Per Person</string>
     <string name="save_split_bills">Confirm and Save</string>
     <string name="tip">TIP</string>

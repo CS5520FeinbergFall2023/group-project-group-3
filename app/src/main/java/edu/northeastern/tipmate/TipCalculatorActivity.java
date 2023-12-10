@@ -83,8 +83,8 @@ public class TipCalculatorActivity extends AppCompatActivity {
         DecimalFormat df = new DecimalFormat("#.##");
         df.setRoundingMode(RoundingMode.CEILING);
 
-        textViewTipAmount.setText("Tip Amount: " + df.format(tipAmount));
-        textViewTotalBill.setText("Total Bill: " + df.format(totalAmount));
+        textViewTipAmount.setText(df.format(tipAmount));
+        textViewTotalBill.setText(df.format(totalAmount));
     }
 
     private String[] getFormattedTipPercentages() {
@@ -97,7 +97,7 @@ public class TipCalculatorActivity extends AppCompatActivity {
 
     private double parseDoubleOrDefault(String str, double defaultValue) {
         try {
-            return Double.parseDouble(str);
+            return Double.parseDouble(str.replace('$','\u0000'));
         } catch (NumberFormatException e) {
             return defaultValue;
         }

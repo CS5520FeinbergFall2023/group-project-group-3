@@ -68,9 +68,14 @@ public class TipHistoryAdapter extends RecyclerView.Adapter<TipHistoryViewHolder
         notifyDataSetChanged();
     }
 
-    private void retractMarkers() {
+    private void retractMarkers(String old_title,String old_desc) {
         clusterManager.removeItems(itemsCache.get(DEFAULT_ADDED_LIST));
         clusterManager.addItems(itemsCache.get(DEFAULT_DELETE_LIST));
+        for(HistoryMarker t:clusterManager.getAlgorithm().getItems()){
+            if(Objects.equals(t.getTitle(), old_title)&& Objects.equals(t.getSnippet(), old_desc))
+                clusterManager.removeItem(t);
+        }
+
         clusterManager.cluster();
 
         itemsCache.get(DEFAULT_ADDED_LIST).clear();
@@ -118,7 +123,7 @@ public class TipHistoryAdapter extends RecyclerView.Adapter<TipHistoryViewHolder
                 if (title.isEmpty()) {
                     Snackbar.make(r, "Title cannot be empty", Snackbar.LENGTH_SHORT).show();
                 } else {
-                    retractMarkers();
+                    retractMarkers(old_title,old_desc);
                     TipHistory target = historyList.get(pos);
                     target.setTitle(title);
                     target.setDesc(desc);
@@ -127,7 +132,7 @@ public class TipHistoryAdapter extends RecyclerView.Adapter<TipHistoryViewHolder
 
                     Snackbar success = Snackbar.make(r, "Successfully edited", Snackbar.LENGTH_SHORT);
                     success.setAction("UNDO", v -> {
-                        retractMarkers();
+                        retractMarkers(title,desc);
                         TipHistory tmp = historyList.get(pos);
                         tmp.setTitle(old_title);
                         tmp.setDesc(old_desc);

@@ -38,21 +38,29 @@ public class TipHistoryAdapter extends RecyclerView.Adapter<TipHistoryViewHolder
     private final GoogleMap googleMap;
     private final ClusterManager<HistoryMarker> clusterManager;
     private final DatabaseAPI databaseAPI;
+    private final Map<String, List<HistoryMarker>> itemsCache;
 
     private static final SimpleDateFormat format = new SimpleDateFormat(" yyyy/MM/dd HH:mm:ss ", Locale.US);
 
-    public TipHistoryAdapter(List<TipHistory> historyList, Context context, GoogleMap googleMap, ClusterManager<HistoryMarker> clusterManager, DatabaseAPI databaseAPI) {
+    private static final String DEFAULT_DELETE_LIST = "itemsDeleted";
+
+    private static final String DEFAULT_ADDED_LIST = "itemsAdded";
+
+    public TipHistoryAdapter(List<TipHistory> historyList, Context context, GoogleMap googleMap,
+            ClusterManager<HistoryMarker> clusterManager, DatabaseAPI databaseAPI,
+            Map<String, List<HistoryMarker>> itemsCache) {
         this.historyList = historyList;
         this.context = context;
         this.googleMap = googleMap;
         this.clusterManager = clusterManager;
         this.databaseAPI = databaseAPI;
+        this.itemsCache = itemsCache;
     }
 
     @NonNull
     @Override
     public TipHistoryViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new TipHistoryViewHolder(LayoutInflater.from(context).inflate(R.layout.history_item, parent,false));
+        return new TipHistoryViewHolder(LayoutInflater.from(context).inflate(R.layout.history_item, parent, false));
     }
 
     public void setHistoryList(List<TipHistory> historyList) {
@@ -60,8 +68,18 @@ public class TipHistoryAdapter extends RecyclerView.Adapter<TipHistoryViewHolder
         notifyDataSetChanged();
     }
 
-    private HistoryMarker addHistoryMarker(TipHistory tipHistory){
-        HistoryMarker ret = new HistoryMarker(tipHistory.getLatitude(), tipHistory.getLongitude(), tipHistory.getTitle(), tipHistory.getDesc());
+    private void retractMarkers() {
+        clusterManager.removeItems(itemsCache.get(DEFAULT_ADDED_LIST));
+        clusterManager.addItems(itemsCache.get(DEFAULT_DELETE_LIST));
+        clusterManager.cluster();
+
+        itemsCache.get(DEFAULT_ADDED_LIST).clear();
+        itemsCache.get(DEFAULT_DELETE_LIST).clear();
+    }
+
+    private HistoryMarker addHistoryMarker(TipHistory tipHistory) {
+        HistoryMarker ret = new HistoryMarker(tipHistory.getLatitude(), tipHistory.getLongitude(),
+                tipHistory.getTitle(), tipHistory.getDesc());
         clusterManager.addItem(ret);
         clusterManager.cluster();
         return ret;
@@ -78,8 +96,8 @@ public class TipHistoryAdapter extends RecyclerView.Adapter<TipHistoryViewHolder
 
         holder.itemView.setOnClickListener(view -> {
             int pos = holder.getAdapterPosition();
-            LatLng latLng = new LatLng(historyList.get(pos).getLatitude(),historyList.get(pos).getLongitude());
-            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng,googleMap.getMaxZoomLevel()));
+            LatLng latLng = new LatLng(historyList.get(pos).getLatitude(), historyList.get(pos).getLongitude());
+            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, googleMap.getMaxZoomLevel()));
         });
         holder.itemView.setOnLongClickListener(view -> {
             int pos = holder.getAdapterPosition();
@@ -99,7 +117,8 @@ public class TipHistoryAdapter extends RecyclerView.Adapter<TipHistoryViewHolder
                 String desc = desc_view.getText().toString().trim();
                 if (title.isEmpty()) {
                     Snackbar.make(r, "Title cannot be empty", Snackbar.LENGTH_SHORT).show();
-                }else {
+                } else {
+                    retractMarkers();
                     TipHistory target = historyList.get(pos);
                     target.setTitle(title);
                     target.setDesc(desc);
@@ -108,6 +127,7 @@ public class TipHistoryAdapter extends RecyclerView.Adapter<TipHistoryViewHolder
 
                     Snackbar success = Snackbar.make(r, "Successfully edited", Snackbar.LENGTH_SHORT);
                     success.setAction("UNDO", v -> {
+                        retractMarkers();
                         TipHistory tmp = historyList.get(pos);
                         tmp.setTitle(old_title);
                         tmp.setDesc(old_desc);

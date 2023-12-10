@@ -21,12 +21,14 @@
         tools:context=".HistoryMapActivity" />
 
     <androidx.core.widget.NestedScrollView
+        android:id="@+id/HistoryScrollView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/guideline" >
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/guideline">
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/HistoryRecyclerView"
             android:layout_width="match_parent"
@@ -37,7 +39,21 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="parent" />
     </androidx.core.widget.NestedScrollView>
-
+    <TextView
+        android:id="@+id/history_no_data"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:textSize="20sp"
+        android:fontFamily="@font/arialbold"
+        android:textColor="@color/white"
+        android:text="@string/start_your_first_split_bill_with_your_friends"
+        android:textAppearance="?android:textAppearanceMedium"
+        app:layout_constraintStart_toStartOf="@id/HistoryScrollView"
+        app:layout_constraintBottom_toBottomOf="@id/HistoryScrollView"
+        app:layout_constraintEnd_toEndOf="@id/HistoryScrollView"
+        app:layout_constraintTop_toBottomOf="@id/guideline"
+        android:visibility="gone" />
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline"
         android:layout_width="wrap_content"

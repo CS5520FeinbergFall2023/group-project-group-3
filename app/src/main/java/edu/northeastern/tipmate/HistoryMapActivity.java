@@ -111,7 +111,7 @@ public class HistoryMapActivity extends FragmentActivity implements LocationList
         historyRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         //Associates the adapter with the RecyclerView
-        historyRecyclerView.setAdapter(new TipHistoryAdapter(historyList, this, mMap, clusterManager,databaseAPI));
+        historyRecyclerView.setAdapter(new TipHistoryAdapter(historyList, this, mMap, clusterManager,databaseAPI, itemsCache));
 
         historyRecyclerView.setHasFixedSize(true);
 
@@ -127,7 +127,9 @@ public class HistoryMapActivity extends FragmentActivity implements LocationList
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
                 int position = viewHolder.getLayoutPosition();
 
+
                 TipHistory tmp = historyList.get(position);
+                retractMarkers();
                 historyList.remove(position);
                 historyAdapter.notifyItemRemoved(position);
                 clusterManager.removeItem(((TipHistoryViewHolder) viewHolder).marker);
@@ -136,6 +138,7 @@ public class HistoryMapActivity extends FragmentActivity implements LocationList
 
                 Snackbar deleted = Snackbar.make(root, "Deleted an record", Snackbar.LENGTH_SHORT);
                 deleted.setAction("UNDO", view -> {
+                    retractMarkers();
                     historyList.add(position, tmp);
                     historyAdapter.notifyItemInserted(position);
                     databaseAPI.storeTipHistory(tmp);
@@ -214,6 +217,15 @@ public class HistoryMapActivity extends FragmentActivity implements LocationList
         return true;
     }
 
+    private void retractMarkers(){
+        clusterManager.removeItems(itemsCache.get(DEFAULT_ADDED_LIST));
+        clusterManager.addItems(itemsCache.get(DEFAULT_DELETE_LIST));
+        clusterManager.cluster();
+
+        itemsCache.get(DEFAULT_ADDED_LIST).clear();
+        itemsCache.get(DEFAULT_DELETE_LIST).clear();
+    }
+
     @SuppressLint("PotentialBehaviorOverride")
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
@@ -226,7 +238,7 @@ public class HistoryMapActivity extends FragmentActivity implements LocationList
         }
 
 //        currentMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(latitude,longitude)).title("You").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude,longitude),14.0f));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude,longitude),0));
         clusterManager = new ClusterManager<HistoryMarker>(this, mMap);
         clusterRenderer = new DefaultClusterRenderer<HistoryMarker>(this, mMap, clusterManager);
         clusterManager.setRenderer(clusterRenderer);
@@ -242,12 +254,7 @@ public class HistoryMapActivity extends FragmentActivity implements LocationList
 
                 // get markers back to the original position if they were relocated
                 if (mMap.getCameraPosition().zoom < mMap.getMaxZoomLevel()) {
-                    clusterManager.removeItems(itemsCache.get(DEFAULT_ADDED_LIST));
-                    clusterManager.addItems(itemsCache.get(DEFAULT_DELETE_LIST));
-                    clusterManager.cluster();
-
-                    itemsCache.get(DEFAULT_ADDED_LIST).clear();
-                    itemsCache.get(DEFAULT_DELETE_LIST).clear();
+                    retractMarkers();
                 }
             }
         });
@@ -267,9 +274,14 @@ public class HistoryMapActivity extends FragmentActivity implements LocationList
                 for (DataSnapshot postSnapshot :dataSnapshot.getChildren()) {
                     TipHistory t = postSnapshot.getValue(TipHistory.class);
                     if(t!=null){
-                        t.setId(dataSnapshot.getKey());
+                        t.setId(postSnapshot.getKey());
                         historyList.add(t);
                     }
+                }
+                if(historyList.size()==0){
+                    findViewById(R.id.history_no_data).setVisibility(View.VISIBLE);
+                }else{
+                    findViewById(R.id.history_no_data).setVisibility(View.GONE);
                 }
                 historyAdapter.setHistoryList(historyList);
             }

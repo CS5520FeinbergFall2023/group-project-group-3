@@ -20,6 +20,11 @@ jobs:
         env:
           DATA: ${{ secrets.GOOGLE_SERVICES_JSON }}
         run: echo $DATA > app/google-services.json
+      - run: cat local.properties | base64
+      - name: Putting data
+        env:
+          DATA: ${{ secrets.LOCAL_PROPERTIES }}
+        run: echo $DATA > local.properties
       - uses: gradle/gradle-build-action@v2
         with:
           gradle-version: current
